@@ -1,6 +1,3 @@
-import numpy as np
-import os, time
-
 while True:
     try:
         nbrVar = int(input("Donner le nombre de variables : "))
@@ -59,19 +56,25 @@ for i in range(nbrContraint):
             print(ve)
 
 # Fonction Optimal
-optimal_function = "z = "
-optimal_function += " + ".join([f"{variables[f'X{i+1}']}X{i+1}" for i in range(nbrVar)])
-print("Fonction Optimal : ")
-print(optimal_function)
-""" 
-print("Variables : ")
-for key, value in variables.items():
-    print(f"{key} = {value}")
-"""
-print("Contraintes:")
+objectifFonction = "z = "
+objectifFonction += " + ".join([f"{variables[f'X{i+1}']}X{i+1}" for i in range(nbrVar)])
+print("Fonction Objectif : ")
+print(objectifFonction)
+
+print("Contraintes :")
 for constraint_coeffs, constraint_result in constraints:
     constraint_str = " + ".join([f"{coeff}X{i+1}" for i, coeff in enumerate(constraint_coeffs)])
     print(f"{constraint_str} ≤ {constraint_result}")
 
 for i in range(1, nbrVar + 1):
     print(f"X{i} >= 0")
+
+print("Variables d'écart")
+
+# Printing objective function in the required format
+print(objectifFonction.replace(' = ', ' - ').replace(' + ', ' - ') + " = 0")
+
+# Printing constraints
+for i, (constraint_coeffs, constraint_result) in enumerate(constraints):
+    constraint_str = " + ".join([f"{coeff}{variable_name}" for coeff, variable_name in zip(constraint_coeffs, variables.keys())])
+    print(f"{constraint_str} + e{i+1} = {constraint_result}")
