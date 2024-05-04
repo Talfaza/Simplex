@@ -1,30 +1,77 @@
 import numpy as np
-import re
+import os, time
 
-nbrVar = int(input("Donner le nombre de variables : "))
+while True:
+    try:
+        nbrVar = int(input("Donner le nombre de variables : "))
+        if nbrVar <= 0:
+            raise ValueError("Le nombre de variables doit être positif.")
+        break
+    except ValueError as ve:
+        print(ve)
 
 variables = {}
 for i in range(nbrVar):
-    variable_name = f"x{i+1}"
+    variable_name = f"X{i+1}"
     while True:
         try:
-            variable_value = int(input(f"Donner la valeur de x{i + 1}: "))
+            variable_value = int(input(f"Donner la valeur de X{i + 1} : "))
+            if variable_value <= 0:
+                raise ValueError("La valeur de la variable doit être positive.")
             variables[variable_name] = variable_value
             break
-        except ValueError:
-            print("Veuillez entrer uniquement des nombres entiers.")
+        except ValueError as ve:
+            print(ve)
 
 
 while True:
-        try:
-            nbrContraint = int(input("Donner le nombre de Contraint : "))
-            break
-        except ValueError:
-            print("Veuillez entrer uniquement des nombres entiers.")
+    try:
+        nbrContraint = int(input("Donner le nombre de Contraint : "))
+        if nbrContraint <= 0:
+            raise ValueError("Le nombre de contraintes doit être positif.")
+        break
+    except ValueError as ve:
+        print(ve)
 
 
 constraints = []
-for i in range(nbrContraint):
-    constraint_str = input(f"Entrez la contrainte {i + 1}: ")
-    constraints.append(constraint_str)
 
+for i in range(nbrContraint):
+    constraint_coeffs = []
+    for j in range(nbrVar):
+        while True:
+            try:
+                coeff = int(input(f"Donner le coefficient de X{j+1} pour la contrainte {i+1} : "))
+                if coeff <= 0:
+                    raise ValueError("Le coefficient doit être positif.")
+                constraint_coeffs.append(coeff)
+                break
+            except ValueError as ve:
+                print(ve)
+    while True:
+        try:
+            constraint_result = int(input(f"Donner le résultat de la contrainte {i+1} : "))
+            if constraint_result <= 0:
+                raise ValueError("Le résultat de la contrainte doit être positif.")
+            constraints.append((constraint_coeffs, constraint_result))
+            break
+        except ValueError as ve:
+            print(ve)
+
+# Fonction Optimal
+optimal_function = "z = "
+optimal_function += " + ".join([f"{variables[f'X{i+1}']}X{i+1}" for i in range(nbrVar)])
+print("Fonction Optimal : ")
+print(optimal_function)
+""" 
+print("Variables : ")
+for key, value in variables.items():
+    print(f"{key} = {value}")
+"""
+print("Contraintes:")
+for constraint_coeffs, constraint_result in constraints:
+    constraint_str = " + ".join([f"{coeff}X{i+1}" for i, coeff in enumerate(constraint_coeffs)])
+    print(f"{constraint_str} ≤ {constraint_result}")
+
+for i in range(1, nbrVar + 1):
+    print(f"X{i} >= 0")
