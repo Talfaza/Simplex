@@ -71,22 +71,22 @@ for i in range(1, nbrVar + 1):
 
 print("---------------")
 
-# Printing objective function in the required format
+# Z -xN = 0 
 print(objectifFonction.replace(' = ', ' - ').replace(' + ', ' - ') + " = 0")
 
-# Printing constraints
+# Affichage Contrainte 
 for i, (constraint_coeffs, constraint_result) in enumerate(constraints):
     constraint_str = " + ".join([f"{coeff}X{i+1}" if coeff != 0 else "0" for i, coeff in enumerate(constraint_coeffs)])
     slack_vars = ['0' if j != i else '1' for j in range(nbrContraint)]
     print(f"{constraint_str} + {' '.join(['e'+str(j+1) if j == i else '0' for j in range(nbrContraint)])} = {constraint_result}")
 
-# Print table header
+# Affichage Entete table (header) 
 print("\nz\t" + "\t".join([f"X{i+1}" for i in range(nbrVar)]) + f"\t{'\t'.join(['e'+str(i+1) for i in range(nbrContraint)])}\t=")
 
-# Print first row
+# Premiere Ligne 
 print(f"1\t{''.join(['-' + str(variables[f'X{i+1}']) + '\t' for i in range(nbrVar)])}{'\t'.join(['0' for _ in range(nbrContraint)])}\t0")
 
-# Print remaining rows
+# Les autres lignes 
 for i, (constraint_coeffs, constraint_result) in enumerate(constraints):
     slack_vars = ['0' if j != i else '1' for j in range(nbrContraint)]
     constraint_str = " + ".join([f"{coeff}X{i+1}" if coeff != 0 else "0" for i, coeff in enumerate(constraint_coeffs)])
