@@ -39,7 +39,7 @@ for i in range(nbrContraint):
         while True:
             try:
                 coeff = int(input(f"Donner le coefficient de X{j+1} pour la contrainte {i+1} : "))
-                if coeff <= 0:
+                if coeff < 0:
                     raise ValueError("Le coefficient doit être positif.")
                 constraint_coeffs.append(coeff)
                 break
@@ -69,12 +69,25 @@ for constraint_coeffs, constraint_result in constraints:
 for i in range(1, nbrVar + 1):
     print(f"X{i} >= 0")
 
-print("Variables d'écart")
+print("---------------")
 
 # Printing objective function in the required format
 print(objectifFonction.replace(' = ', ' - ').replace(' + ', ' - ') + " = 0")
 
 # Printing constraints
 for i, (constraint_coeffs, constraint_result) in enumerate(constraints):
-    constraint_str = " + ".join([f"{coeff}{variable_name}" for coeff, variable_name in zip(constraint_coeffs, variables.keys())])
-    print(f"{constraint_str} + e{i+1} = {constraint_result}")
+    constraint_str = " + ".join([f"{coeff}X{i+1}" if coeff != 0 else "0" for i, coeff in enumerate(constraint_coeffs)])
+    slack_vars = ['0' if j != i else '1' for j in range(nbrContraint)]
+    print(f"{constraint_str} + {' '.join(['e'+str(j+1) if j == i else '0' for j in range(nbrContraint)])} = {constraint_result}")
+
+# Print table header
+print("\nz\t" + "\t".join([f"X{i+1}" for i in range(nbrVar)]) + f"\t{'\t'.join(['e'+str(i+1) for i in range(nbrContraint)])}\t=")
+
+# Print first row
+print(f"1\t{''.join(['-' + str(variables[f'X{i+1}']) + '\t' for i in range(nbrVar)])}{'\t'.join(['0' for _ in range(nbrContraint)])}\t0")
+
+# Print remaining rows
+for i, (constraint_coeffs, constraint_result) in enumerate(constraints):
+    slack_vars = ['0' if j != i else '1' for j in range(nbrContraint)]
+    constraint_str = " + ".join([f"{coeff}X{i+1}" if coeff != 0 else "0" for i, coeff in enumerate(constraint_coeffs)])
+    print(f"0\t{''.join([str(coeff) + '\t' if coeff != 0 else '0\t' for coeff in constraint_coeffs])}{'\t'.join(slack_vars)}\t{constraint_result}")
