@@ -14,7 +14,14 @@ for i in range(nbrVar):
         except ValueError:
             print("Veuillez entrer uniquement des nombres entiers.")
 
-nbrContraint = int(input("Donner le nombre de Contraint : "))
+
+while True:
+        try:
+            nbrContraint = int(input("Donner le nombre de Contraint : "))
+            break
+        except ValueError:
+            print("Veuillez entrer uniquement des nombres entiers.")
+
 
 constraints = []
 for i in range(nbrContraint):
