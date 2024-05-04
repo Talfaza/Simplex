@@ -86,7 +86,7 @@ print("\nz\t" + "\t".join([f"X{i+1}" for i in range(nbrVar)]) + f"\t{'\t'.join([
 # Premiere Ligne 
 print(f"1\t{''.join(['-' + str(variables[f'X{i+1}']) + '\t' for i in range(nbrVar)])}{'\t'.join(['0' for _ in range(nbrContraint)])}\t0")
 
-# Les autres lignes 
+#  
 for i, (constraint_coeffs, constraint_result) in enumerate(constraints):
     slack_vars = ['0' if j != i else '1' for j in range(nbrContraint)]
     constraint_str = " + ".join([f"{coeff}X{i+1}" if coeff != 0 else "0" for i, coeff in enumerate(constraint_coeffs)])
