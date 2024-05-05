@@ -91,3 +91,21 @@ for i, (constraint_coeffs, constraint_result) in enumerate(constraints):
     slack_vars = ['0' if j != i else '1' for j in range(nbrContraint)]
     constraint_str = " + ".join([f"{coeff}X{i+1}" if coeff != 0 else "0" for i, coeff in enumerate(constraint_coeffs)])
     print(f"0\t{''.join([str(coeff) + '\t' if coeff != 0 else '0\t' for coeff in constraint_coeffs])}{'\t'.join(slack_vars)}\t{constraint_result}")
+
+
+
+# TODO: math    
+
+print("VHB : " + ", ".join([f"{var}" for var in variables.keys()]) + " = 0")
+
+
+
+
+
+
+
+
+
+
+
+
