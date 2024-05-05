@@ -97,9 +97,9 @@ for i, (constraint_coeffs, constraint_result) in enumerate(constraints):
 # TODO: math    
 
 print("VHB : " + ", ".join([f"{var}" for var in variables.keys()]) + " = 0")
-
-
-
+print("\nVB : \n")
+for i, (_, constraint_result) in enumerate(constraints):
+    print(f"e{i+1} = {constraint_result}")
 
 
 
