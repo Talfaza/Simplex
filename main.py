@@ -1,3 +1,8 @@
+import colorama
+from colorama import Fore, Back, Style
+
+colorama.init(autoreset=True)
+
 while True:
     try:
         nbrVar = int(input("Donner le nombre de variables : "))
@@ -8,6 +13,8 @@ while True:
         print(ve)
 
 variables = {}
+max_variable_index = None
+max_variable_value = 0  # Track the maximum variable value
 for i in range(nbrVar):
     variable_name = f"X{i+1}"
     while True:
@@ -16,10 +23,12 @@ for i in range(nbrVar):
             if variable_value <= 0:
                 raise ValueError("La valeur de la variable doit être positive.")
             variables[variable_name] = variable_value
+            if variable_value > max_variable_value:
+                max_variable_value = variable_value
+                max_variable_index = i
             break
         except ValueError as ve:
             print(ve)
-
 
 while True:
     try:
@@ -29,7 +38,6 @@ while True:
         break
     except ValueError as ve:
         print(ve)
-
 
 constraints = []
 
@@ -81,21 +89,20 @@ for i, (constraint_coeffs, constraint_result) in enumerate(constraints):
     print(f"{constraint_str} + {' '.join(['e'+str(j+1) if j == i else '0' for j in range(nbrContraint)])} = {constraint_result}")
 
 # Affichage Entete table (header) 
-print("\nz\t" + "\t".join([f"X{i+1}" for i in range(nbrVar)]) + f"\t{'\t'.join(['e'+str(i+1) for i in range(nbrContraint)])}\t=")
+header = "\nz\t" + "\t".join([f"X{i+1}" for i in range(nbrVar)])
+header += "\t" + '\t'.join([f"e{i+1}" for i in range(nbrContraint)]) + "\t="
+print(header)
 
 # Premiere Ligne 
-print(f"1\t{''.join(['-' + str(variables[f'X{i+1}']) + '\t' for i in range(nbrVar)])}{'\t'.join(['0' for _ in range(nbrContraint)])}\t0")
+print("1\t" + ''.join([f"-{str(variables[f'X{i+1}'])}\t" if i == max_variable_index else f"{str(variables[f'X{i+1}'])}\t" for i in range(nbrVar)]) + '\t'.join(['0' for _ in range(nbrContraint)]) + "\t0")
 
 #  
 for i, (constraint_coeffs, constraint_result) in enumerate(constraints):
     slack_vars = ['0' if j != i else '1' for j in range(nbrContraint)]
     constraint_str = " + ".join([f"{coeff}X{i+1}" if coeff != 0 else "0" for i, coeff in enumerate(constraint_coeffs)])
-    print(f"0\t{''.join([str(coeff) + '\t' if coeff != 0 else '0\t' for coeff in constraint_coeffs])}{'\t'.join(slack_vars)}\t{constraint_result}")
-
-
+    print("0\t" + ''.join([f"{str(coeff)}\t" if coeff != 0 else '0\t' for coeff in constraint_coeffs]) + '\t'.join(slack_vars) + f"\t{constraint_result}")
 
 # TODO: math    
-
 print("VHB : " + ", ".join([f"{var}" for var in variables.keys()]) + " = 0")
 print("\nVB : \n")
 for i, (_, constraint_result) in enumerate(constraints):
@@ -103,9 +110,23 @@ for i, (_, constraint_result) in enumerate(constraints):
 
 
 
+print(Fore.RED + "Colonne Pivot : ")
+header = "\nz\t" + "\t".join([Fore.RED + f"X{i+1}" + Fore.RESET if max_variable_index == i else f"X{i+1}" for i in range(nbrVar)])
+header += "\t" + '\t'.join([f"e{i+1}" for i in range(nbrContraint)]) + "\t="
 
+print(header)
 
+# Premiere Ligne 
+print("1\t" + ''.join([Fore.RED + f"-{str(variables[f'X{i+1}'])}\t" + Fore.RESET if i == max_variable_index else f"{str(variables[f'X{i+1}'])}\t" for i in range(nbrVar)]) + '\t'.join(['0' for _ in range(nbrContraint)]) + "\t0")
 
+#  
+for i, (constraint_coeffs, constraint_result) in enumerate(constraints):
+    slack_vars = ['0' if j != i else '1' for j in range(nbrContraint)]
+    constraint_str = " + ".join([f"{coeff}X{i+1}" if coeff != 0 else "0" for i, coeff in enumerate(constraint_coeffs)])
+    print("0\t" + ''.join([Fore.RED + f"{str(coeff)}\t" + Fore.RESET if max_variable_index == j else f"{str(coeff)}\t" for j, coeff in enumerate(constraint_coeffs)]) + '\t'.join(slack_vars) + f"\t{constraint_result}")
 
+"""
 
-
+max_variable_index = None
+max_variable_value = 0  # Track the maximum variable value
+"""
