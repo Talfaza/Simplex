@@ -110,7 +110,7 @@ for i, (_, constraint_result) in enumerate(constraints):
 
 
 
-print(Fore.RED + "Colonne Pivot : ")
+print(Fore.RED + "Colonne Et Ligne Pivot ")
 header = "\nz\t" + "\t".join([Fore.RED + f"X{i+1}" + Fore.RESET if max_variable_index == i else f"X{i+1}" for i in range(nbrVar)])
 header += "\t" + '\t'.join([f"e{i+1}" for i in range(nbrContraint)]) + "\t="
 
@@ -130,3 +130,28 @@ for i, (constraint_coeffs, constraint_result) in enumerate(constraints):
 max_variable_index = None
 max_variable_value = 0  # Track the maximum variable value
 """
+
+
+
+# print(Fore.RED + "Ligne Pivot : ")
+# Grap only the results 
+resultcontraint = list(elements[1] for elements in constraints)
+
+# debug
+#print(resultcontraint)
+# print(max_variable_index)
+# print(max_variable_value)
+
+findpivotmin = []
+
+# Iterate over constraints to find the pivot elements
+for constraint_coeffs, constraint_result in constraints:
+    coeff = constraint_coeffs[max_variable_index]  # Coefficient of the pivot column
+    if coeff != 0:  # Ensure the coefficient is non-zero to avoid division by zero
+        pivot_element = constraint_result / coeff 
+        findpivotmin.append(pivot_element)
+    else:
+        findpivotmin.append(float('inf'))  # Placeholder for zero coefficient (no pivot)
+
+print("Pivot elements for each constraint:")
+print(findpivotmin)
