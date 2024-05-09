@@ -108,43 +108,8 @@ print("\nVB : \n")
 for i, (_, constraint_result) in enumerate(constraints):
     print(f"e{i+1} = {constraint_result}")
 
-
-
-print(Fore.RED + "Colonne Et Ligne Pivot ")
-header = "\nz\t" + "\t".join([Fore.RED + f"X{i+1}" + Fore.RESET if max_variable_index == i else f"X{i+1}" for i in range(nbrVar)])
-header += "\t" + '\t'.join([f"e{i+1}" for i in range(nbrContraint)]) + "\t="
-
-print(header)
-
-# Premiere Ligne 
-print("1\t" + ''.join([Fore.RED + f"-{str(variables[f'X{i+1}'])}\t" + Fore.RESET if i == max_variable_index else f"{str(variables[f'X{i+1}'])}\t" for i in range(nbrVar)]) + '\t'.join(['0' for _ in range(nbrContraint)]) + "\t0")
-
-#  
-for i, (constraint_coeffs, constraint_result) in enumerate(constraints):
-    slack_vars = ['0' if j != i else '1' for j in range(nbrContraint)]
-    constraint_str = " + ".join([f"{coeff}X{i+1}" if coeff != 0 else "0" for i, coeff in enumerate(constraint_coeffs)])
-    print("0\t" + ''.join([Fore.RED + f"{str(coeff)}\t" + Fore.RESET if max_variable_index == j else f"{str(coeff)}\t" for j, coeff in enumerate(constraint_coeffs)]) + '\t'.join(slack_vars) + f"\t{constraint_result}")
-
-"""
-
-max_variable_index = None
-max_variable_value = 0  # Track the maximum variable value
-"""
-
-
-
-# print(Fore.RED + "Ligne Pivot : ")
-# Grap only the results 
-resultcontraint = list(elements[1] for elements in constraints)
-
-# debug
-#print(resultcontraint)
-# print(max_variable_index)
-# print(max_variable_value)
-
+# Find the pivot elements
 findpivotmin = []
-
-# Iterate over constraints to find the pivot elements
 for constraint_coeffs, constraint_result in constraints:
     coeff = constraint_coeffs[max_variable_index]  # Coefficient of the pivot column
     if coeff != 0:  # Ensure the coefficient is non-zero to avoid division by zero
@@ -153,5 +118,27 @@ for constraint_coeffs, constraint_result in constraints:
     else:
         findpivotmin.append(float('inf'))  # Placeholder for zero coefficient (no pivot)
 
-print("Pivot elements for each constraint:")
-print(findpivotmin)
+min_index = findpivotmin.index(min(findpivotmin))  # Find the index of the minimum value in findpivotmin
+
+print(Fore.RED + "Colonne Et Ligne Pivot ")
+
+# Header
+header = "\nz\t" + "\t".join([Fore.RED + f"X{i+1}" + Fore.RESET if max_variable_index == i else f"X{i+1}" for i in range(nbrVar)])
+header += "\t" + '\t'.join([f"e{i+1}" for i in range(nbrContraint)]) + "\t="
+print(header)
+
+# Pivot Column
+pivot_column = ''.join([Fore.RED + f"{str(coeff)}\t" + Fore.RESET if max_variable_index == j else f"{str(coeff)}\t" for j, coeff in enumerate(constraint_coeffs)])
+pivot_column += '\t'.join(slack_vars) + f"\t{constraint_result}"
+print(pivot_column)
+
+# Pivot Row and Others
+for i, (constraint_coeffs, constraint_result) in enumerate(constraints):
+    slack_vars = ['0' if j != i else '1' for j in range(nbrContraint)]
+    constraint_str = " + ".join([f"{coeff}X{i+1}" if coeff != 0 else "0" for i, coeff in enumerate(constraint_coeffs)])
+    constraint_line = ''.join([Fore.RED + f"{str(coeff)}\t" + Fore.RESET if max_variable_index == j else f"{str(coeff)}\t" for j, coeff in enumerate(constraint_coeffs)])
+    constraint_line += '\t'.join(slack_vars) + f"\t{constraint_result}"
+    if i == min_index:  # Color the row with the minimum pivot element
+        print(Fore.RED + constraint_line)
+    else:
+        print(constraint_line)
