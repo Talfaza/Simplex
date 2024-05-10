@@ -130,3 +130,4 @@ for i, (constraint_coeffs, constraint_result) in enumerate(constraints):
 max_variable_index = None
 max_variable_value = 0  # Track the maximum variable value
 """
+# TODO: add lines for the pivot by exctracting the min value 
