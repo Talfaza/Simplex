@@ -1,144 +1,65 @@
-import colorama
-from colorama import Fore, Back, Style
+import numpy as np
 
-colorama.init(autoreset=True)
+# Function to find the pivot column
+def find_pivot_column(tableau):
+    min_value = None
+    pivot_column = None
+    for index, value in enumerate(tableau[0]):
+        if min_value is None or value < min_value:
+            min_value = value
+            pivot_column = index
+    return pivot_column
 
-while True:
-    try:
-        nbrVar = int(input("Donner le nombre de variables : "))
-        if nbrVar <= 0:
-            raise ValueError("Le nombre de variables doit être positif.")
-        break
-    except ValueError as ve:
-        print(ve)
+# Function to find the pivot row
+def find_pivot_row(tableau, pivot_column):
+    ratios = []
+    for index, ligne in enumerate(tableau):
+        if index == 0:
+            continue  # Ignore the first row (objective function)
+        if ligne[pivot_column] <= 0:
+            ratios.append(np.inf)  # If the coefficient is negative or zero, assign an infinite value
+            continue
+        ratios.append(ligne[-1] / ligne[pivot_column])  # Calculate the ratio
+    pivot_row = np.argmin(ratios) + 1  # Find the minimum ratio
+    return pivot_row
 
-variables = {}
-max_variable_index = None
-max_variable_value = 0  # Track the maximum variable value
-for i in range(nbrVar):
-    variable_name = f"X{i+1}"
-    while True:
-        try:
-            variable_value = int(input(f"Donner la valeur de X{i + 1} : "))
-            if variable_value <= 0:
-                raise ValueError("La valeur de la variable doit être positive.")
-            variables[variable_name] = variable_value
-            if variable_value > max_variable_value:
-                max_variable_value = variable_value
-                max_variable_index = i
-            break
-        except ValueError as ve:
-            print(ve)
+# Initial data
+num_variables = 2  # Example number of variables
+num_contraintes = 2  # Example number of constraints
+tableau = np.array([
+    [1, -1, -2, 0],
+    [0, 3, 1, 18],
+    [0, 1, 1, 4]
+], dtype=float)  # Ensure tableau is of float type
 
-while True:
-    try:
-        nbrContraint = int(input("Donner le nombre de Contraint : "))
-        if nbrContraint <= 0:
-            raise ValueError("Le nombre de contraintes doit être positif.")
-        break
-    except ValueError as ve:
-        print(ve)
+iterations = 0
+# Continue iterations as long as there are negative coefficients in the Z row
+while np.min(tableau[0, :-1]) < 0 and iterations < 100:
+    iterations += 1
 
-constraints = []
+    # Find pivot column and pivot row
+    pivot_column = find_pivot_column(tableau)
+    pivot_row = find_pivot_row(tableau, pivot_column)
 
-for i in range(nbrContraint):
-    constraint_coeffs = []
-    for j in range(nbrVar):
-        while True:
-            try:
-                coeff = int(input(f"Donner le coefficient de X{j+1} pour la contrainte {i+1} : "))
-                if coeff < 0:
-                    raise ValueError("Le coefficient doit être positif.")
-                constraint_coeffs.append(coeff)
-                break
-            except ValueError as ve:
-                print(ve)
-    while True:
-        try:
-            constraint_result = int(input(f"Donner le résultat de la contrainte {i+1} : "))
-            if constraint_result <= 0:
-                raise ValueError("Le résultat de la contrainte doit être positif.")
-            constraints.append((constraint_coeffs, constraint_result))
-            break
-        except ValueError as ve:
-            print(ve)
+    # Display iteration results
+    print(f"Iteration {iterations}:")
+    print(f"The pivot value is: {tableau[pivot_row, pivot_column]}")
+    print(f"Its location is: Row {pivot_row}, Column {pivot_column}")
 
-# Fonction Optimal
-objectifFonction = "z = "
-objectifFonction += " + ".join([f"{variables[f'X{i+1}']}X{i+1}" for i in range(nbrVar)])
-print("Fonction Objectif : ")
-print(objectifFonction)
+    # Step 1: Divide the pivot row by the pivot value
+    pivot_value = tableau[pivot_row, pivot_column]
+    tableau[pivot_row] /= pivot_value
 
-print("Contraintes :")
-for constraint_coeffs, constraint_result in constraints:
-    constraint_str = " + ".join([f"{coeff}X{i+1}" for i, coeff in enumerate(constraint_coeffs)])
-    print(f"{constraint_str} ≤ {constraint_result}")
+    # Step 2: Subtract rows by the value to eliminate multiplied by the pivot row
+    for i in range(len(tableau)):
+        if i != pivot_row:
+            value_to_eliminate = tableau[i, pivot_column]
+            tableau[i] -= value_to_eliminate * tableau[pivot_row]
 
-for i in range(1, nbrVar + 1):
-    print(f"X{i} >= 0")
+    # Display tableau after Gaussian elimination steps
+    print(f"Tableau after iteration {iterations} :")
+    print(tableau)
 
-print("---------------")
-
-# Z -xN = 0 
-print(objectifFonction.replace(' = ', ' - ').replace(' + ', ' - ') + " = 0")
-
-# Affichage Contrainte 
-for i, (constraint_coeffs, constraint_result) in enumerate(constraints):
-    constraint_str = " + ".join([f"{coeff}X{i+1}" if coeff != 0 else "0" for i, coeff in enumerate(constraint_coeffs)])
-    slack_vars = ['0' if j != i else '1' for j in range(nbrContraint)]
-    print(f"{constraint_str} + {' '.join(['e'+str(j+1) if j == i else '0' for j in range(nbrContraint)])} = {constraint_result}")
-
-# Affichage Entete table (header) 
-header = "\nz\t" + "\t".join([f"X{i+1}" for i in range(nbrVar)])
-header += "\t" + '\t'.join([f"e{i+1}" for i in range(nbrContraint)]) + "\t="
-print(header)
-
-# Premiere Ligne 
-print("1\t" + ''.join([f"-{str(variables[f'X{i+1}'])}\t" if i == max_variable_index else f"{str(variables[f'X{i+1}'])}\t" for i in range(nbrVar)]) + '\t'.join(['0' for _ in range(nbrContraint)]) + "\t0")
-
-#  
-for i, (constraint_coeffs, constraint_result) in enumerate(constraints):
-    slack_vars = ['0' if j != i else '1' for j in range(nbrContraint)]
-    constraint_str = " + ".join([f"{coeff}X{i+1}" if coeff != 0 else "0" for i, coeff in enumerate(constraint_coeffs)])
-    print("0\t" + ''.join([f"{str(coeff)}\t" if coeff != 0 else '0\t' for coeff in constraint_coeffs]) + '\t'.join(slack_vars) + f"\t{constraint_result}")
-
-# TODO: math    
-print("VHB : " + ", ".join([f"{var}" for var in variables.keys()]) + " = 0")
-print("\nVB : \n")
-for i, (_, constraint_result) in enumerate(constraints):
-    print(f"e{i+1} = {constraint_result}")
-
-# Find the pivot elements
-findpivotmin = []
-for constraint_coeffs, constraint_result in constraints:
-    coeff = constraint_coeffs[max_variable_index]  # Coefficient of the pivot column
-    if coeff != 0:  # Ensure the coefficient is non-zero to avoid division by zero
-        pivot_element = constraint_result / coeff 
-        findpivotmin.append(pivot_element)
-    else:
-        findpivotmin.append(float('inf'))  # Placeholder for zero coefficient (no pivot)
-
-min_index = findpivotmin.index(min(findpivotmin))  # Find the index of the minimum value in findpivotmin
-
-print(Fore.RED + "Colonne Et Ligne Pivot ")
-
-# Header
-header = "\nz\t" + "\t".join([Fore.RED + f"X{i+1}" + Fore.RESET if max_variable_index == i else f"X{i+1}" for i in range(nbrVar)])
-header += "\t" + '\t'.join([f"e{i+1}" for i in range(nbrContraint)]) + "\t="
-print(header)
-
-# Pivot Column
-pivot_column = ''.join([Fore.RED + f"{str(coeff)}\t" + Fore.RESET if max_variable_index == j else f"{str(coeff)}\t" for j, coeff in enumerate(constraint_coeffs)])
-pivot_column += '\t'.join(slack_vars) + f"\t{constraint_result}"
-print(pivot_column)
-
-# Pivot Row and Others
-for i, (constraint_coeffs, constraint_result) in enumerate(constraints):
-    slack_vars = ['0' if j != i else '1' for j in range(nbrContraint)]
-    constraint_str = " + ".join([f"{coeff}X{i+1}" if coeff != 0 else "0" for i, coeff in enumerate(constraint_coeffs)])
-    constraint_line = ''.join([Fore.RED + f"{str(coeff)}\t" + Fore.RESET if max_variable_index == j else f"{str(coeff)}\t" for j, coeff in enumerate(constraint_coeffs)])
-    constraint_line += '\t'.join(slack_vars) + f"\t{constraint_result}"
-    if i == min_index:  # Color the row with the minimum pivot element
-        print(Fore.RED + constraint_line)
-    else:
-        print(constraint_line)
+# Retrieve Z value
+z_value = tableau[0, -1]
+print(f"Z value: {z_value}")
